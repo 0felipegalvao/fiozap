@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/0felipegalvao/fiozap/internal/database/repository"
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/database/repository"
+	"fiozap/internal/model"
 )
 
 type AdminHandler struct {

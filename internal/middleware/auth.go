@@ -9,9 +9,9 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
-	"github.com/0felipegalvao/fiozap/internal/database/repository"
-	"github.com/0felipegalvao/fiozap/internal/logger"
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/database/repository"
+	"fiozap/internal/logger"
+	"fiozap/internal/model"
 )
 
 type contextKey string

@@ -3,7 +3,7 @@ package migration
 import (
 	"github.com/jmoiron/sqlx"
 
-	"github.com/0felipegalvao/fiozap/internal/logger"
+	"fiozap/internal/logger"
 )
 
 func Run(db *sqlx.DB) error {

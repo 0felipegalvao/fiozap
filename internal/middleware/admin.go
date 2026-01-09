@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/model"
 )
 
 type AdminMiddleware struct {

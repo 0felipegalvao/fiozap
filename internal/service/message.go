@@ -14,8 +14,8 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/0felipegalvao/fiozap/internal/logger"
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/logger"
+	"fiozap/internal/model"
 )
 
 type MessageService struct {

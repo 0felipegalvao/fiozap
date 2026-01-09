@@ -1,4 +1,4 @@
-module github.com/0felipegalvao/fiozap
+module fiozap
 
 go 1.24.0
 

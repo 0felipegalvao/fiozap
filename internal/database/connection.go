@@ -8,8 +8,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
 
-	"github.com/0felipegalvao/fiozap/internal/config"
-	"github.com/0felipegalvao/fiozap/internal/logger"
+	"fiozap/internal/config"
+	"fiozap/internal/logger"
 )
 
 func Connect(cfg *config.Config) (*sqlx.DB, error) {

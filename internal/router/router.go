@@ -6,11 +6,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/0felipegalvao/fiozap/internal/config"
-	"github.com/0felipegalvao/fiozap/internal/database/repository"
-	"github.com/0felipegalvao/fiozap/internal/handler"
-	"github.com/0felipegalvao/fiozap/internal/middleware"
-	"github.com/0felipegalvao/fiozap/internal/service"
+	"fiozap/internal/config"
+	"fiozap/internal/database/repository"
+	"fiozap/internal/handler"
+	"fiozap/internal/middleware"
+	"fiozap/internal/service"
 )
 
 func New(cfg *config.Config, db *sqlx.DB) *mux.Router {

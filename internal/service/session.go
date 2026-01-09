@@ -8,10 +8,10 @@ import (
 
 	"go.mau.fi/whatsmeow"
 
-	"github.com/0felipegalvao/fiozap/internal/database/repository"
-	"github.com/0felipegalvao/fiozap/internal/logger"
-	"github.com/0felipegalvao/fiozap/internal/model"
-	"github.com/0felipegalvao/fiozap/internal/wameow"
+	"fiozap/internal/database/repository"
+	"fiozap/internal/logger"
+	"fiozap/internal/model"
+	"fiozap/internal/wameow"
 )
 
 type SessionService struct {

@@ -13,7 +13,7 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
 
-	"github.com/0felipegalvao/fiozap/internal/logger"
+	"fiozap/internal/logger"
 )
 
 func getWaLogger(module string) waLog.Logger {

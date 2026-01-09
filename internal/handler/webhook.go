@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/0felipegalvao/fiozap/internal/database/repository"
-	"github.com/0felipegalvao/fiozap/internal/middleware"
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/database/repository"
+	"fiozap/internal/middleware"
+	"fiozap/internal/model"
 )
 
 var supportedEventTypes = []string{

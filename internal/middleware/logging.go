@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/0felipegalvao/fiozap/internal/logger"
+	"fiozap/internal/logger"
 )
 
 type responseWriter struct {

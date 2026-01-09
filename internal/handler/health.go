@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/model"
 )
 
 var startTime = time.Now()

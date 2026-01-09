@@ -7,7 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/model"
 )
 
 type UserRepository struct {

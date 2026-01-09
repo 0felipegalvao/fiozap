@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/0felipegalvao/fiozap/internal/middleware"
-	"github.com/0felipegalvao/fiozap/internal/model"
-	"github.com/0felipegalvao/fiozap/internal/service"
+	"fiozap/internal/middleware"
+	"fiozap/internal/model"
+	"fiozap/internal/service"
 )
 
 type UserHandler struct {

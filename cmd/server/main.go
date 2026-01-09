@@ -8,11 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/0felipegalvao/fiozap/internal/config"
-	"github.com/0felipegalvao/fiozap/internal/database"
-	"github.com/0felipegalvao/fiozap/internal/database/migration"
-	"github.com/0felipegalvao/fiozap/internal/logger"
-	"github.com/0felipegalvao/fiozap/internal/router"
+	"fiozap/internal/config"
+	"fiozap/internal/database"
+	"fiozap/internal/database/migration"
+	"fiozap/internal/logger"
+	"fiozap/internal/router"
 )
 
 func main() {

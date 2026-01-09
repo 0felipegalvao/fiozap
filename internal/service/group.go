@@ -9,7 +9,7 @@ import (
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/types"
 
-	"github.com/0felipegalvao/fiozap/internal/model"
+	"fiozap/internal/model"
 )
 
 type GroupService struct {
