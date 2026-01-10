@@ -1,6 +1,6 @@
--- v1 -> v2: Create message history table
+-- v1 -> v2: Create fzMessage table
 
-CREATE TABLE IF NOT EXISTS "fzMessageHistory" (
+CREATE TABLE IF NOT EXISTS "fzMessage" (
     "id" SERIAL PRIMARY KEY,
     "userId" VARCHAR(64) NOT NULL,
     "chatJid" VARCHAR(255) NOT NULL,
@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS "fzMessageHistory" (
     UNIQUE("userId", "messageId")
 );
 
-CREATE INDEX IF NOT EXISTS "idxFzMessageHistoryUserChat" 
-ON "fzMessageHistory" ("userId", "chatJid", "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS "idxFzMessageUserChat" 
+ON "fzMessage" ("userId", "chatJid", "timestamp" DESC);

@@ -1,4 +1,4 @@
--- v0 -> v1: Create users table
+-- v0 -> v1: Create fzUser table
 
 CREATE TABLE IF NOT EXISTS "fzUser" (
     "id" VARCHAR(64) PRIMARY KEY,
