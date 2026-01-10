@@ -11,8 +11,6 @@ type Config struct {
 	Port       string
 	Address    string
 	AdminToken string
-	DBType     string
-	DBPath     string
 	DBHost     string
 	DBPort     string
 	DBUser     string
@@ -31,12 +29,10 @@ func Load() (*Config, error) {
 		Port:       getEnv("PORT", "8080"),
 		Address:    getEnv("ADDRESS", "0.0.0.0"),
 		AdminToken: getEnv("ADMIN_TOKEN", generateRandomToken()),
-		DBType:     getEnv("DB_TYPE", "sqlite"),
-		DBPath:     getEnv("DB_PATH", "./data"),
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", ""),
-		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBUser:     getEnv("DB_USER", "fiozap"),
+		DBPassword: getEnv("DB_PASSWORD", "fiozap123"),
 		DBName:     getEnv("DB_NAME", "fiozap"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
 		LogLevel:   getEnv("LOG_LEVEL", "info"),

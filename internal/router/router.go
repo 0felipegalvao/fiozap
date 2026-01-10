@@ -24,7 +24,7 @@ func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
 	healthHandler := handler.NewHealthHandler()
 	adminHandler := handler.NewAdminHandler(userRepo)
 
-	sessionService := service.NewSessionService(userRepo)
+	sessionService := service.NewSessionService(userRepo, cfg)
 	sessionHandler := handler.NewSessionHandler(sessionService)
 
 	messageService := service.NewMessageService(sessionService)

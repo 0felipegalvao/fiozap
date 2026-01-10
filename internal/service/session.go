@@ -8,6 +8,7 @@ import (
 
 	"go.mau.fi/whatsmeow"
 
+	"fiozap/internal/config"
 	"fiozap/internal/database/repository"
 	"fiozap/internal/logger"
 	"fiozap/internal/model"
@@ -15,15 +16,20 @@ import (
 )
 
 type SessionService struct {
-	userRepo *repository.UserRepository
-	clients  map[string]*wameow.Client
-	mu       sync.RWMutex
+	userRepo   *repository.UserRepository
+	clients    map[string]*wameow.Client
+	mu         sync.RWMutex
+	dbConnStr  string
 }
 
-func NewSessionService(userRepo *repository.UserRepository) *SessionService {
+func NewSessionService(userRepo *repository.UserRepository, cfg *config.Config) *SessionService {
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode)
+	
 	return &SessionService{
-		userRepo: userRepo,
-		clients:  make(map[string]*wameow.Client),
+		userRepo:  userRepo,
+		clients:   make(map[string]*wameow.Client),
+		dbConnStr: connStr,
 	}
 }
 
@@ -37,8 +43,7 @@ func (s *SessionService) Connect(ctx context.Context, user *model.User, subscrib
 		}
 	}
 
-	dbPath := fmt.Sprintf("./data/session_%s.db", user.ID)
-	client, err := wameow.NewClient(ctx, dbPath)
+	client, err := wameow.NewClient(ctx, s.dbConnStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}

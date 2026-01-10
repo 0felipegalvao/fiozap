@@ -24,10 +24,10 @@ type Client struct {
 	wac *whatsmeow.Client
 }
 
-func NewClient(ctx context.Context, dbPath string) (*Client, error) {
+func NewClient(ctx context.Context, postgresConnStr string) (*Client, error) {
 	dbLog := getWaLogger("database")
 
-	container, err := sqlstore.New(ctx, "sqlite3", fmt.Sprintf("file:%s?_foreign_keys=on", dbPath), dbLog)
+	container, err := sqlstore.New(ctx, "postgres", postgresConnStr, dbLog)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sqlstore: %w", err)
 	}

@@ -23,17 +23,17 @@ func Run(db *sqlx.DB) error {
 
 func createUsersTable(db *sqlx.DB) error {
 	query := `
-		CREATE TABLE IF NOT EXISTS users (
-			id TEXT PRIMARY KEY,
-			name TEXT NOT NULL,
-			token TEXT NOT NULL UNIQUE,
-			webhook TEXT DEFAULT '',
-			jid TEXT DEFAULT '',
-			qrcode TEXT DEFAULT '',
-			connected INTEGER DEFAULT 0,
-			expiration INTEGER DEFAULT 0,
-			events TEXT DEFAULT '',
-			proxy_url TEXT DEFAULT ''
+		CREATE TABLE IF NOT EXISTS "fzUser" (
+			"id" VARCHAR(64) PRIMARY KEY,
+			"name" VARCHAR(255) NOT NULL,
+			"token" VARCHAR(255) NOT NULL UNIQUE,
+			"webhook" TEXT DEFAULT '',
+			"jid" VARCHAR(255) DEFAULT '',
+			"qrCode" TEXT DEFAULT '',
+			"connected" INTEGER DEFAULT 0,
+			"expiration" BIGINT DEFAULT 0,
+			"events" TEXT DEFAULT '',
+			"proxyUrl" TEXT DEFAULT ''
 		)
 	`
 
@@ -41,24 +41,24 @@ func createUsersTable(db *sqlx.DB) error {
 		return err
 	}
 
-	logger.Debug("Users table ready")
+	logger.Debug("fzUser table ready")
 	return nil
 }
 
 func createMessageHistoryTable(db *sqlx.DB) error {
 	query := `
-		CREATE TABLE IF NOT EXISTS message_history (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id TEXT NOT NULL,
-			chat_jid TEXT NOT NULL,
-			sender_jid TEXT NOT NULL,
-			message_id TEXT NOT NULL,
-			timestamp DATETIME NOT NULL,
-			message_type TEXT NOT NULL,
-			text_content TEXT,
-			media_link TEXT,
-			quoted_message_id TEXT,
-			UNIQUE(user_id, message_id)
+		CREATE TABLE IF NOT EXISTS "fzMessageHistory" (
+			"id" SERIAL PRIMARY KEY,
+			"userId" VARCHAR(64) NOT NULL,
+			"chatJid" VARCHAR(255) NOT NULL,
+			"senderJid" VARCHAR(255) NOT NULL,
+			"messageId" VARCHAR(255) NOT NULL,
+			"timestamp" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			"messageType" VARCHAR(50) NOT NULL,
+			"textContent" TEXT,
+			"mediaLink" TEXT,
+			"quotedMessageId" VARCHAR(255),
+			UNIQUE("userId", "messageId")
 		)
 	`
 
@@ -67,13 +67,13 @@ func createMessageHistoryTable(db *sqlx.DB) error {
 	}
 
 	indexQuery := `
-		CREATE INDEX IF NOT EXISTS idx_message_history_user_chat 
-		ON message_history (user_id, chat_jid, timestamp DESC)
+		CREATE INDEX IF NOT EXISTS "idxFzMessageHistoryUserChat" 
+		ON "fzMessageHistory" ("userId", "chatJid", "timestamp" DESC)
 	`
 	if _, err := db.Exec(indexQuery); err != nil {
 		return err
 	}
 
-	logger.Debug("Message history table ready")
+	logger.Debug("fzMessageHistory table ready")
 	return nil
 }
