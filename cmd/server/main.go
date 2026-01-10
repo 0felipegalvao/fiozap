@@ -16,6 +16,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	cfg, err := config.Load()
 	if err != nil {
 		panic(err)
@@ -24,15 +26,21 @@ func main() {
 	logger.Init(cfg.LogLevel, cfg.LogType == "console")
 	logger.Info("Starting FioZap API...")
 
-	db, err := database.Connect(cfg)
+	dbUtil, err := database.ConnectDBUtil(cfg)
 	if err != nil {
 		logger.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Close()
+	defer dbUtil.Close()
 
-	if err := migration.Run(db); err != nil {
+	if err := migration.Run(ctx, dbUtil); err != nil {
 		logger.Fatalf("Failed to run migrations: %v", err)
 	}
+
+	db, err := database.Connect(cfg)
+	if err != nil {
+		logger.Fatalf("Failed to connect to database for queries: %v", err)
+	}
+	defer db.Close()
 
 	r := router.New(cfg, db)
 
