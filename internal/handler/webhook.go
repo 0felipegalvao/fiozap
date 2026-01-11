@@ -35,6 +35,15 @@ func NewWebhookHandler(userRepo *repository.UserRepository) *WebhookHandler {
 	return &WebhookHandler{userRepo: userRepo}
 }
 
+// Get godoc
+// @Summary Get webhook configuration
+// @Description Get current webhook URL and subscribed events
+// @Tags Webhook
+// @Produce json
+// @Success 200 {object} model.Response
+// @Failure 401 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /webhook [get]
 func (h *WebhookHandler) Get(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -53,6 +62,17 @@ func (h *WebhookHandler) Get(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Set godoc
+// @Summary Set webhook configuration
+// @Description Configure webhook URL and events to subscribe
+// @Tags Webhook
+// @Accept json
+// @Produce json
+// @Param request body model.WebhookRequest true "Webhook configuration"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /webhook [post]
 func (h *WebhookHandler) Set(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -84,9 +104,21 @@ func (h *WebhookHandler) Set(w http.ResponseWriter, r *http.Request) {
 
 	model.RespondOK(w, map[string]interface{}{
 		"webhook": req.WebhookURL,
+		"events":  validEvents,
 	})
 }
 
+// Update godoc
+// @Summary Update webhook configuration
+// @Description Update webhook URL, events and active status
+// @Tags Webhook
+// @Accept json
+// @Produce json
+// @Param request body object{webhook=string,events=[]string,active=bool} true "Webhook update data"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /webhook [put]
 func (h *WebhookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -134,6 +166,15 @@ func (h *WebhookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Delete godoc
+// @Summary Delete webhook configuration
+// @Description Remove webhook URL and unsubscribe from all events
+// @Tags Webhook
+// @Produce json
+// @Success 200 {object} model.Response
+// @Failure 401 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /webhook [delete]
 func (h *WebhookHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {

@@ -47,12 +47,12 @@ func (s *UserService) GetInfo(ctx context.Context, user *model.User, phones []st
 	var result []map[string]interface{}
 	for jid, userInfo := range info {
 		result = append(result, map[string]interface{}{
-			"jid":         jid.String(),
-			"verified":    userInfo.VerifiedName != nil,
-			"name":        userInfo.VerifiedName,
-			"status":      userInfo.Status,
-			"picture_id":  userInfo.PictureID,
-			"devices":     userInfo.Devices,
+			"jid":        jid.String(),
+			"verified":   userInfo.VerifiedName != nil,
+			"name":       userInfo.VerifiedName,
+			"status":     userInfo.Status,
+			"picture_id": userInfo.PictureID,
+			"devices":    userInfo.Devices,
 		})
 	}
 
@@ -73,9 +73,9 @@ func (s *UserService) CheckUser(ctx context.Context, user *model.User, phones []
 	var result []map[string]interface{}
 	for _, r := range resp {
 		result = append(result, map[string]interface{}{
-			"query":        r.Query,
-			"jid":          r.JID.String(),
-			"is_in":        r.IsIn,
+			"query":         r.Query,
+			"jid":           r.JID.String(),
+			"is_in":         r.IsIn,
 			"verified_name": r.VerifiedName,
 		})
 	}

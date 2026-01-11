@@ -65,12 +65,12 @@ func (s *GroupService) List(ctx context.Context, user *model.User) ([]map[string
 	var result []map[string]interface{}
 	for _, g := range groups {
 		result = append(result, map[string]interface{}{
-			"jid":              g.JID.String(),
-			"name":             g.Name,
-			"topic":            g.Topic,
+			"jid":               g.JID.String(),
+			"name":              g.Name,
+			"topic":             g.Topic,
 			"participant_count": len(g.Participants),
-			"owner":            g.OwnerJID.String(),
-			"created_at":       g.GroupCreated,
+			"owner":             g.OwnerJID.String(),
+			"created_at":        g.GroupCreated,
 		})
 	}
 

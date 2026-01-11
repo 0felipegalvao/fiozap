@@ -49,10 +49,10 @@ type LocationMessage struct {
 }
 
 type ContactMessage struct {
-	Phone       string `json:"phone"`
-	ContactName string `json:"contact_name"`
+	Phone        string `json:"phone"`
+	ContactName  string `json:"contact_name"`
 	ContactVCard string `json:"contact_vcard"`
-	ID          string `json:"id,omitempty"`
+	ID           string `json:"id,omitempty"`
 }
 
 type ReactionMessage struct {

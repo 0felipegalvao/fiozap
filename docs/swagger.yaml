@@ -151,6 +151,15 @@ definitions:
       video:
         type: string
     type: object
+  model.WebhookRequest:
+    properties:
+      events:
+        items:
+          type: string
+        type: array
+      webhookurl:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -318,6 +327,41 @@ paths:
       summary: Delete message
       tags:
       - Messages
+  /chat/presence:
+    post:
+      consumes:
+      - application/json
+      description: Send typing/recording indicator to a chat
+      parameters:
+      - description: Chat presence data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            media:
+              type: string
+            phone:
+              type: string
+            state:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send chat presence
+      tags:
+      - User
   /chat/react:
     post:
       consumes:
@@ -542,6 +586,244 @@ paths:
       summary: Send video
       tags:
       - Messages
+  /group/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new WhatsApp group
+      parameters:
+      - description: Group data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+            participants:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create group
+      tags:
+      - Group
+  /group/info:
+    get:
+      description: Get detailed information about a group
+      parameters:
+      - description: Group JID
+        in: query
+        name: jid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get group info
+      tags:
+      - Group
+  /group/invitelink:
+    get:
+      description: Get the invite link for a group
+      parameters:
+      - description: Group JID
+        in: query
+        name: jid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get group invite link
+      tags:
+      - Group
+  /group/leave:
+    post:
+      consumes:
+      - application/json
+      description: Leave a WhatsApp group
+      parameters:
+      - description: Group JID
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            jid:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Leave group
+      tags:
+      - Group
+  /group/list:
+    get:
+      description: List all joined WhatsApp groups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List groups
+      tags:
+      - Group
+  /group/name:
+    post:
+      consumes:
+      - application/json
+      description: Update the name of a group
+      parameters:
+      - description: Group name data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            jid:
+              type: string
+            name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Set group name
+      tags:
+      - Group
+  /group/topic:
+    post:
+      consumes:
+      - application/json
+      description: Update the topic/description of a group
+      parameters:
+      - description: Group topic data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            jid:
+              type: string
+            topic:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Set group topic
+      tags:
+      - Group
+  /group/updateparticipants:
+    post:
+      consumes:
+      - application/json
+      description: Add, remove, promote or demote group participants
+      parameters:
+      - description: Participants data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            action:
+              type: string
+            jid:
+              type: string
+            participants:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update group participants
+      tags:
+      - Group
   /health:
     get:
       description: Get API health status, uptime and memory stats
@@ -687,6 +969,255 @@ paths:
       summary: Get session status
       tags:
       - Session
+  /user/avatar:
+    post:
+      consumes:
+      - application/json
+      description: Get profile picture URL for a phone number
+      parameters:
+      - description: Phone and preview option
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            phone:
+              type: string
+            preview:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user avatar
+      tags:
+      - User
+  /user/check:
+    post:
+      consumes:
+      - application/json
+      description: Check if phone numbers are registered on WhatsApp
+      parameters:
+      - description: Phone numbers
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            phone:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Check if users are on WhatsApp
+      tags:
+      - User
+  /user/contacts:
+    get:
+      description: Get all contacts from the connected WhatsApp account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get contacts
+      tags:
+      - User
+  /user/info:
+    post:
+      consumes:
+      - application/json
+      description: Get WhatsApp user info by phone numbers
+      parameters:
+      - description: Phone numbers
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            phone:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user info
+      tags:
+      - User
+  /user/presence:
+    post:
+      consumes:
+      - application/json
+      description: Send online/offline presence status
+      parameters:
+      - description: Presence (available/unavailable)
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            presence:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send presence
+      tags:
+      - User
+  /webhook:
+    delete:
+      description: Remove webhook URL and unsubscribe from all events
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete webhook configuration
+      tags:
+      - Webhook
+    get:
+      description: Get current webhook URL and subscribed events
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get webhook configuration
+      tags:
+      - Webhook
+    post:
+      consumes:
+      - application/json
+      description: Configure webhook URL and events to subscribe
+      parameters:
+      - description: Webhook configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.WebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Set webhook configuration
+      tags:
+      - Webhook
+    put:
+      consumes:
+      - application/json
+      description: Update webhook URL, events and active status
+      parameters:
+      - description: Webhook update data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            active:
+              type: boolean
+            events:
+              items:
+                type: string
+              type: array
+            webhook:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update webhook configuration
+      tags:
+      - Webhook
 securityDefinitions:
   AdminAuth:
     in: header

@@ -68,6 +68,14 @@ func main() {
 
 	r := router.New(cfg, db)
 
+	r.StartDispatcher()
+	defer r.StopDispatcher()
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		r.GetSessionService().ReconnectAll(ctx)
+	}()
+
 	srv := &http.Server{
 		Addr:         cfg.Address + ":" + cfg.Port,
 		Handler:      r,

@@ -12,12 +12,20 @@ import (
 	"fiozap/internal/handler"
 	"fiozap/internal/middleware"
 	"fiozap/internal/service"
+	"fiozap/internal/webhook"
 )
 
-func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
+type Router struct {
+	mux            *mux.Router
+	dispatcher     *webhook.Dispatcher
+	sessionService *service.SessionService
+}
+
+func New(cfg *config.Config, db *sqlx.DB) *Router {
 	r := mux.NewRouter()
 
 	userRepo := repository.NewUserRepository(db)
+	webhookRepo := repository.NewWebhookRepository(db)
 
 	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 	adminMiddleware := middleware.NewAdminMiddleware(cfg.AdminToken)
@@ -26,6 +34,11 @@ func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
 	adminHandler := handler.NewAdminHandler(userRepo)
 
 	sessionService := service.NewSessionService(userRepo, cfg)
+	sessionService.SetWebhookRepo(webhookRepo)
+
+	dispatcher := webhook.NewDispatcher(webhookRepo, userRepo)
+	sessionService.SetDispatcher(dispatcher)
+
 	sessionHandler := handler.NewSessionHandler(sessionService)
 
 	messageService := service.NewMessageService(sessionService)
@@ -39,6 +52,7 @@ func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
 
 	webhookHandler := handler.NewWebhookHandler(userRepo)
 
+	r.Use(cors)
 	r.Use(middleware.Logging)
 
 	r.HandleFunc("/health", healthHandler.GetHealth).Methods("GET")
@@ -98,7 +112,27 @@ func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
 	api.HandleFunc("/webhook", webhookHandler.Update).Methods("PUT")
 	api.HandleFunc("/webhook", webhookHandler.Delete).Methods("DELETE")
 
-	return r
+	return &Router{
+		mux:            r,
+		dispatcher:     dispatcher,
+		sessionService: sessionService,
+	}
+}
+
+func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	rt.mux.ServeHTTP(w, r)
+}
+
+func (rt *Router) StartDispatcher() {
+	rt.dispatcher.Start()
+}
+
+func (rt *Router) StopDispatcher() {
+	rt.dispatcher.Stop()
+}
+
+func (rt *Router) GetSessionService() *service.SessionService {
+	return rt.sessionService
 }
 
 func cors(next http.Handler) http.Handler {

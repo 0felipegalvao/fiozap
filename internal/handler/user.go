@@ -18,6 +18,17 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
+// GetInfo godoc
+// @Summary Get user info
+// @Description Get WhatsApp user info by phone numbers
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object{phone=[]string} true "Phone numbers"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /user/info [post]
 func (h *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -47,6 +58,17 @@ func (h *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	model.RespondOK(w, result)
 }
 
+// CheckUser godoc
+// @Summary Check if users are on WhatsApp
+// @Description Check if phone numbers are registered on WhatsApp
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object{phone=[]string} true "Phone numbers"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /user/check [post]
 func (h *UserHandler) CheckUser(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -76,6 +98,17 @@ func (h *UserHandler) CheckUser(w http.ResponseWriter, r *http.Request) {
 	model.RespondOK(w, result)
 }
 
+// GetAvatar godoc
+// @Summary Get user avatar
+// @Description Get profile picture URL for a phone number
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object{phone=string,preview=bool} true "Phone and preview option"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /user/avatar [post]
 func (h *UserHandler) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -106,6 +139,15 @@ func (h *UserHandler) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	model.RespondOK(w, result)
 }
 
+// GetContacts godoc
+// @Summary Get contacts
+// @Description Get all contacts from the connected WhatsApp account
+// @Tags User
+// @Produce json
+// @Success 200 {object} model.Response
+// @Failure 401 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /user/contacts [get]
 func (h *UserHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -122,6 +164,17 @@ func (h *UserHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 	model.RespondOK(w, result)
 }
 
+// SendPresence godoc
+// @Summary Send presence
+// @Description Send online/offline presence status
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object{presence=string} true "Presence (available/unavailable)"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /user/presence [post]
 func (h *UserHandler) SendPresence(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {
@@ -150,6 +203,17 @@ func (h *UserHandler) SendPresence(w http.ResponseWriter, r *http.Request) {
 	model.RespondOK(w, map[string]string{"details": "Presence sent"})
 }
 
+// ChatPresence godoc
+// @Summary Send chat presence
+// @Description Send typing/recording indicator to a chat
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object{phone=string,state=string,media=string} true "Chat presence data"
+// @Success 200 {object} model.Response
+// @Failure 400 {object} model.Response
+// @Security ApiKeyAuth
+// @Router /chat/presence [post]
 func (h *UserHandler) ChatPresence(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
 	if user == nil {

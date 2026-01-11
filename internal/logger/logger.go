@@ -96,3 +96,7 @@ func Get() *zerolog.Logger {
 func Sub(module string) zerolog.Logger {
 	return log.With().Str("module", module).Logger()
 }
+
+func Writer() io.Writer {
+	return os.Stdout
+}

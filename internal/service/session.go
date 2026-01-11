@@ -13,24 +13,35 @@ import (
 	"fiozap/internal/logger"
 	"fiozap/internal/model"
 	"fiozap/internal/wameow"
+	"fiozap/internal/webhook"
 )
 
 type SessionService struct {
-	userRepo   *repository.UserRepository
-	clients    map[string]*wameow.Client
-	mu         sync.RWMutex
-	dbConnStr  string
+	userRepo    *repository.UserRepository
+	webhookRepo *repository.WebhookRepository
+	clients     map[string]*wameow.Client
+	mu          sync.RWMutex
+	dbConnStr   string
+	dispatcher  *webhook.Dispatcher
 }
 
 func NewSessionService(userRepo *repository.UserRepository, cfg *config.Config) *SessionService {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode)
-	
+
 	return &SessionService{
 		userRepo:  userRepo,
 		clients:   make(map[string]*wameow.Client),
 		dbConnStr: connStr,
 	}
+}
+
+func (s *SessionService) SetWebhookRepo(repo *repository.WebhookRepository) {
+	s.webhookRepo = repo
+}
+
+func (s *SessionService) SetDispatcher(d *webhook.Dispatcher) {
+	s.dispatcher = d
 }
 
 func (s *SessionService) Connect(ctx context.Context, user *model.User, subscribe []string, immediate bool) (map[string]interface{}, error) {
@@ -43,10 +54,20 @@ func (s *SessionService) Connect(ctx context.Context, user *model.User, subscrib
 		}
 	}
 
-	client, err := wameow.NewClient(ctx, s.dbConnStr)
+	client, err := wameow.NewClient(ctx, s.dbConnStr, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
+
+	client.SetEventCallback(func(eventType string, data interface{}) {
+		s.handleEvent(user.ID, eventType, data)
+	})
+
+	client.SetQRCallback(func(code string) {
+		if err := s.userRepo.UpdateQRCode(user.ID, code); err != nil {
+			logger.Warnf("Failed to update QR code: %v", err)
+		}
+	})
 
 	if err := client.Connect(ctx); err != nil {
 		return nil, fmt.Errorf("failed to connect: %w", err)
@@ -58,12 +79,43 @@ func (s *SessionService) Connect(ctx context.Context, user *model.User, subscrib
 		logger.Warnf("Failed to update connected status: %v", err)
 	}
 
+	if client.IsLoggedIn() {
+		jid := client.GetJID()
+		if err := s.userRepo.UpdateJID(user.ID, jid.String()); err != nil {
+			logger.Warnf("Failed to update JID: %v", err)
+		}
+	}
+
 	return map[string]interface{}{
 		"webhook": user.Webhook,
 		"jid":     user.JID,
 		"events":  subscribe,
 		"details": "Connected!",
 	}, nil
+}
+
+func (s *SessionService) handleEvent(userID, eventType string, data interface{}) {
+	if s.dispatcher != nil {
+		if err := s.dispatcher.Enqueue(userID, eventType, data); err != nil {
+			logger.Warnf("Failed to enqueue webhook event: %v", err)
+		}
+	}
+
+	if eventType == "Connected" {
+		if dataMap, ok := data.(map[string]interface{}); ok {
+			if jid, ok := dataMap["jid"].(string); ok {
+				if err := s.userRepo.UpdateJID(userID, jid); err != nil {
+					logger.Warnf("Failed to update JID: %v", err)
+				}
+			}
+		}
+	}
+
+	if eventType == "Disconnected" || eventType == "LoggedOut" {
+		if err := s.userRepo.UpdateConnected(userID, 0); err != nil {
+			logger.Warnf("Failed to update connected status: %v", err)
+		}
+	}
 }
 
 func (s *SessionService) Disconnect(user *model.User) error {
@@ -113,6 +165,10 @@ func (s *SessionService) Logout(ctx context.Context, user *model.User) error {
 		logger.Warnf("Failed to update connected status: %v", err)
 	}
 
+	if err := s.userRepo.UpdateJID(user.ID, ""); err != nil {
+		logger.Warnf("Failed to clear JID: %v", err)
+	}
+
 	return nil
 }
 
@@ -145,7 +201,7 @@ func (s *SessionService) GetQR(user *model.User) (string, error) {
 
 	client, exists := s.clients[user.ID]
 	if !exists {
-		return "", errors.New("no session")
+		return "", errors.New("no session, call /session/connect first")
 	}
 
 	if !client.IsConnected() {
@@ -156,7 +212,12 @@ func (s *SessionService) GetQR(user *model.User) (string, error) {
 		return "", errors.New("already logged in")
 	}
 
-	return user.QRCode, nil
+	freshUser, err := s.userRepo.GetByID(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return freshUser.QRCode, nil
 }
 
 func (s *SessionService) PairPhone(ctx context.Context, user *model.User, phone string) (string, error) {
@@ -165,7 +226,7 @@ func (s *SessionService) PairPhone(ctx context.Context, user *model.User, phone 
 
 	client, exists := s.clients[user.ID]
 	if !exists {
-		return "", errors.New("no session")
+		return "", errors.New("no session, call /session/connect first")
 	}
 
 	waClient := client.GetClient()
@@ -179,6 +240,28 @@ func (s *SessionService) PairPhone(ctx context.Context, user *model.User, phone 
 	}
 
 	return code, nil
+}
+
+func (s *SessionService) ReconnectAll(ctx context.Context) {
+	users, err := s.userRepo.GetConnectedUsers()
+	if err != nil {
+		logger.Errorf("Failed to get connected users: %v", err)
+		return
+	}
+
+	logger.Infof("Reconnecting %d users...", len(users))
+
+	for _, user := range users {
+		go func(u model.User) {
+			_, err := s.Connect(ctx, &u, nil, false)
+			if err != nil {
+				logger.Warnf("Failed to reconnect user %s: %v", u.ID, err)
+				s.userRepo.UpdateConnected(u.ID, 0)
+			} else {
+				logger.Infof("User %s reconnected", u.ID)
+			}
+		}(user)
+	}
 }
 
 func (s *SessionService) GetClient(userID string) *wameow.Client {
