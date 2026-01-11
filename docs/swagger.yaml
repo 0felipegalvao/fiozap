@@ -1,0 +1,699 @@
+basePath: /
+definitions:
+  model.AudioMessage:
+    properties:
+      audio:
+        type: string
+      id:
+        type: string
+      mimetype:
+        type: string
+      phone:
+        type: string
+      ptt:
+        type: boolean
+    type: object
+  model.ConnectRequest:
+    properties:
+      immediate:
+        type: boolean
+      subscribe:
+        items:
+          type: string
+        type: array
+    type: object
+  model.ContactMessage:
+    properties:
+      contact_name:
+        type: string
+      contact_vcard:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.DeleteMessage:
+    properties:
+      message_id:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.DocumentMessage:
+    properties:
+      caption:
+        type: string
+      document:
+        type: string
+      filename:
+        type: string
+      id:
+        type: string
+      mimetype:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.ImageMessage:
+    properties:
+      caption:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      mimetype:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.LocationMessage:
+    properties:
+      address:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.PairPhoneRequest:
+    properties:
+      phone:
+        type: string
+    type: object
+  model.ReactionMessage:
+    properties:
+      emoji:
+        type: string
+      message_id:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      error:
+        type: string
+      success:
+        type: boolean
+    type: object
+  model.TextMessage:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+      phone:
+        type: string
+    type: object
+  model.UserCreateRequest:
+    properties:
+      events:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      webhook:
+        type: string
+    type: object
+  model.UserUpdateRequest:
+    properties:
+      events:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      webhook:
+        type: string
+    type: object
+  model.VideoMessage:
+    properties:
+      caption:
+        type: string
+      id:
+        type: string
+      mimetype:
+        type: string
+      phone:
+        type: string
+      video:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@fiozap.io
+    name: FioZap Support
+  description: WhatsApp API using whatsmeow
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: FioZap API
+  version: "1.0"
+paths:
+  /admin/users:
+    get:
+      description: Get all users or a specific user by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminAuth: []
+      summary: List users or get single user
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Create a new API user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminAuth: []
+      summary: Create new user
+      tags:
+      - Admin
+  /admin/users/{id}:
+    delete:
+      description: Delete a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminAuth: []
+      summary: Delete user
+      tags:
+      - Admin
+    get:
+      description: Get all users or a specific user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminAuth: []
+      summary: List users or get single user
+      tags:
+      - Admin
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminAuth: []
+      summary: Update user
+      tags:
+      - Admin
+  /chat/delete:
+    post:
+      consumes:
+      - application/json
+      description: Delete a sent message
+      parameters:
+      - description: Delete data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeleteMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete message
+      tags:
+      - Messages
+  /chat/react:
+    post:
+      consumes:
+      - application/json
+      description: Send a reaction to a message
+      parameters:
+      - description: Reaction data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReactionMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: React to message
+      tags:
+      - Messages
+  /chat/send/audio:
+    post:
+      consumes:
+      - application/json
+      description: Send an audio file to a phone number
+      parameters:
+      - description: Audio data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.AudioMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send audio
+      tags:
+      - Messages
+  /chat/send/contact:
+    post:
+      consumes:
+      - application/json
+      description: Send a contact card to a phone number
+      parameters:
+      - description: Contact data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.ContactMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send contact
+      tags:
+      - Messages
+  /chat/send/document:
+    post:
+      consumes:
+      - application/json
+      description: Send a document to a phone number
+      parameters:
+      - description: Document data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.DocumentMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send document
+      tags:
+      - Messages
+  /chat/send/image:
+    post:
+      consumes:
+      - application/json
+      description: Send an image to a phone number
+      parameters:
+      - description: Image data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.ImageMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send image
+      tags:
+      - Messages
+  /chat/send/location:
+    post:
+      consumes:
+      - application/json
+      description: Send a location to a phone number
+      parameters:
+      - description: Location data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.LocationMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send location
+      tags:
+      - Messages
+  /chat/send/text:
+    post:
+      consumes:
+      - application/json
+      description: Send a text message to a phone number
+      parameters:
+      - description: Message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.TextMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send text message
+      tags:
+      - Messages
+  /chat/send/video:
+    post:
+      consumes:
+      - application/json
+      description: Send a video to a phone number
+      parameters:
+      - description: Video data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.VideoMessage'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Send video
+      tags:
+      - Messages
+  /health:
+    get:
+      description: Get API health status, uptime and memory stats
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - Health
+  /session/connect:
+    post:
+      consumes:
+      - application/json
+      description: Connect and start a WhatsApp session
+      parameters:
+      - description: Connection options
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/model.ConnectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Connect WhatsApp session
+      tags:
+      - Session
+  /session/disconnect:
+    post:
+      description: Disconnect the current WhatsApp session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Disconnect WhatsApp session
+      tags:
+      - Session
+  /session/logout:
+    post:
+      description: Logout and clear WhatsApp session data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Logout WhatsApp session
+      tags:
+      - Session
+  /session/pairphone:
+    post:
+      consumes:
+      - application/json
+      description: Get pairing code for phone number authentication
+      parameters:
+      - description: Phone number
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.PairPhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Pair with phone number
+      tags:
+      - Session
+  /session/qr:
+    get:
+      description: Get QR code for WhatsApp authentication
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get QR code
+      tags:
+      - Session
+  /session/status:
+    get:
+      description: Get the current WhatsApp session status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get session status
+      tags:
+      - Session
+securityDefinitions:
+  AdminAuth:
+    in: header
+    name: Token
+    type: apiKey
+  ApiKeyAuth:
+    in: header
+    name: Token
+    type: apiKey
+swagger: "2.0"

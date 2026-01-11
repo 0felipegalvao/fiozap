@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	"fiozap/internal/config"
 	"fiozap/internal/database/repository"
@@ -41,6 +42,7 @@ func New(cfg *config.Config, db *sqlx.DB) *mux.Router {
 	r.Use(middleware.Logging)
 
 	r.HandleFunc("/health", healthHandler.GetHealth).Methods("GET")
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	admin := r.PathPrefix("/admin").Subrouter()
 	admin.Use(adminMiddleware.Authenticate)

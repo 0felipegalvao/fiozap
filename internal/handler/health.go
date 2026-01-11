@@ -16,6 +16,13 @@ func NewHealthHandler() *HealthHandler {
 	return &HealthHandler{}
 }
 
+// GetHealth godoc
+// @Summary Health check
+// @Description Get API health status, uptime and memory stats
+// @Tags Health
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /health [get]
 func (h *HealthHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)

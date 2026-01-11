@@ -1,4 +1,4 @@
-.PHONY: all build run dev clean test lint fmt tidy docker-up docker-down docker-logs help
+.PHONY: all build run dev clean test lint fmt tidy docker-up docker-down docker-logs help swagger
 
 APP_NAME := fiozap
 BINARY := bin/$(APP_NAME)
@@ -29,6 +29,10 @@ tidy:
 
 download:
 	@$(GO) mod download
+
+## Swagger
+swagger:
+	@swag init -g cmd/server/main.go -o docs
 
 ## Code Quality
 fmt:
@@ -90,6 +94,7 @@ help:
 	@echo "  make tidy         - Run go mod tidy"
 	@echo "  make download     - Download dependencies"
 	@echo ""
+	@echo "  make swagger      - Generate Swagger docs"
 	@echo "  make fmt          - Format code"
 	@echo "  make lint         - Run linter"
 	@echo "  make vet          - Run go vet"

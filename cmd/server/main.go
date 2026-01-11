@@ -13,7 +13,31 @@ import (
 	"fiozap/internal/database/migration"
 	"fiozap/internal/logger"
 	"fiozap/internal/router"
+
+	_ "fiozap/docs"
 )
+
+// @title FioZap API
+// @version 1.0
+// @description WhatsApp API using whatsmeow
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name FioZap Support
+// @contact.email support@fiozap.io
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Token
+
+// @securityDefinitions.apikey AdminAuth
+// @in header
+// @name Token
 
 func main() {
 	ctx := context.Background()
