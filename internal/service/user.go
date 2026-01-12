@@ -8,8 +8,6 @@ import (
 
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/types"
-
-	"fiozap/internal/model"
 )
 
 type UserService struct {
@@ -20,8 +18,8 @@ func NewUserService(sessionService *SessionService) *UserService {
 	return &UserService{sessionService: sessionService}
 }
 
-func (s *UserService) GetInfo(ctx context.Context, user *model.User, phones []string) ([]map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) GetInfo(ctx context.Context, userID, sessionID string, phones []string) ([]map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -59,8 +57,8 @@ func (s *UserService) GetInfo(ctx context.Context, user *model.User, phones []st
 	return result, nil
 }
 
-func (s *UserService) CheckUser(ctx context.Context, user *model.User, phones []string) ([]map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) CheckUser(ctx context.Context, userID, sessionID string, phones []string) ([]map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -83,8 +81,8 @@ func (s *UserService) CheckUser(ctx context.Context, user *model.User, phones []
 	return result, nil
 }
 
-func (s *UserService) GetAvatar(ctx context.Context, user *model.User, phone string, preview bool) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) GetAvatar(ctx context.Context, userID, sessionID string, phone string, preview bool) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -116,8 +114,8 @@ func (s *UserService) GetAvatar(ctx context.Context, user *model.User, phone str
 	}, nil
 }
 
-func (s *UserService) GetContacts(ctx context.Context, user *model.User) ([]map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) GetContacts(ctx context.Context, userID, sessionID string) ([]map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -141,8 +139,8 @@ func (s *UserService) GetContacts(ctx context.Context, user *model.User) ([]map[
 	return result, nil
 }
 
-func (s *UserService) SendPresence(ctx context.Context, user *model.User, presence string) error {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) SendPresence(ctx context.Context, userID, sessionID string, presence string) error {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return errors.New("no session")
 	}
@@ -160,8 +158,8 @@ func (s *UserService) SendPresence(ctx context.Context, user *model.User, presen
 	return client.SendPresence(ctx, p)
 }
 
-func (s *UserService) ChatPresence(ctx context.Context, user *model.User, phone, state, media string) error {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *UserService) ChatPresence(ctx context.Context, userID, sessionID string, phone, state, media string) error {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return errors.New("no session")
 	}

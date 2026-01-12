@@ -31,7 +31,8 @@ func NewGroupHandler(groupService *service.GroupService) *GroupHandler {
 // @Router /group/create [post]
 func (h *GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -50,7 +51,7 @@ func (h *GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.groupService.Create(r.Context(), user, req.Name, req.Participants)
+	result, err := h.groupService.Create(r.Context(), user.ID, session.ID, req.Name, req.Participants)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -70,12 +71,13 @@ func (h *GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Router /group/list [get]
 func (h *GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
 
-	result, err := h.groupService.List(r.Context(), user)
+	result, err := h.groupService.List(r.Context(), user.ID, session.ID)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -96,7 +98,8 @@ func (h *GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Router /group/info [get]
 func (h *GroupHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -107,7 +110,7 @@ func (h *GroupHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.groupService.GetInfo(r.Context(), user, groupJID)
+	result, err := h.groupService.GetInfo(r.Context(), user.ID, session.ID, groupJID)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -128,7 +131,8 @@ func (h *GroupHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 // @Router /group/invitelink [get]
 func (h *GroupHandler) GetInviteLink(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -139,7 +143,7 @@ func (h *GroupHandler) GetInviteLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.groupService.GetInviteLink(r.Context(), user, groupJID)
+	result, err := h.groupService.GetInviteLink(r.Context(), user.ID, session.ID, groupJID)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -161,7 +165,8 @@ func (h *GroupHandler) GetInviteLink(w http.ResponseWriter, r *http.Request) {
 // @Router /group/leave [post]
 func (h *GroupHandler) Leave(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -179,7 +184,7 @@ func (h *GroupHandler) Leave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupService.Leave(r.Context(), user, req.GroupJID)
+	err := h.groupService.Leave(r.Context(), user.ID, session.ID, req.GroupJID)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -201,7 +206,8 @@ func (h *GroupHandler) Leave(w http.ResponseWriter, r *http.Request) {
 // @Router /group/updateparticipants [post]
 func (h *GroupHandler) UpdateParticipants(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -230,7 +236,7 @@ func (h *GroupHandler) UpdateParticipants(w http.ResponseWriter, r *http.Request
 		req.Action = "add"
 	}
 
-	result, err := h.groupService.UpdateParticipants(r.Context(), user, req.GroupJID, req.Participants, req.Action)
+	result, err := h.groupService.UpdateParticipants(r.Context(), user.ID, session.ID, req.GroupJID, req.Participants, req.Action)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -252,7 +258,8 @@ func (h *GroupHandler) UpdateParticipants(w http.ResponseWriter, r *http.Request
 // @Router /group/name [post]
 func (h *GroupHandler) SetName(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -271,7 +278,7 @@ func (h *GroupHandler) SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupService.SetName(r.Context(), user, req.GroupJID, req.Name)
+	err := h.groupService.SetName(r.Context(), user.ID, session.ID, req.GroupJID, req.Name)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -293,7 +300,8 @@ func (h *GroupHandler) SetName(w http.ResponseWriter, r *http.Request) {
 // @Router /group/topic [post]
 func (h *GroupHandler) SetTopic(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -312,7 +320,7 @@ func (h *GroupHandler) SetTopic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupService.SetTopic(r.Context(), user, req.GroupJID, req.Topic)
+	err := h.groupService.SetTopic(r.Context(), user.ID, session.ID, req.GroupJID, req.Topic)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return

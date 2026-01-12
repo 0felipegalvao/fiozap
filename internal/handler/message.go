@@ -31,7 +31,8 @@ func NewMessageHandler(messageService *service.MessageService) *MessageHandler {
 // @Router /chat/send/text [post]
 func (h *MessageHandler) SendText(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -52,7 +53,7 @@ func (h *MessageHandler) SendText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendText(r.Context(), user, &req)
+	result, err := h.messageService.SendText(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -74,7 +75,8 @@ func (h *MessageHandler) SendText(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/image [post]
 func (h *MessageHandler) SendImage(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -95,7 +97,7 @@ func (h *MessageHandler) SendImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendImage(r.Context(), user, &req)
+	result, err := h.messageService.SendImage(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -117,7 +119,8 @@ func (h *MessageHandler) SendImage(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/audio [post]
 func (h *MessageHandler) SendAudio(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -138,7 +141,7 @@ func (h *MessageHandler) SendAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendAudio(r.Context(), user, &req)
+	result, err := h.messageService.SendAudio(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -160,7 +163,8 @@ func (h *MessageHandler) SendAudio(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/video [post]
 func (h *MessageHandler) SendVideo(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -181,7 +185,7 @@ func (h *MessageHandler) SendVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendVideo(r.Context(), user, &req)
+	result, err := h.messageService.SendVideo(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -203,7 +207,8 @@ func (h *MessageHandler) SendVideo(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/document [post]
 func (h *MessageHandler) SendDocument(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -229,7 +234,7 @@ func (h *MessageHandler) SendDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendDocument(r.Context(), user, &req)
+	result, err := h.messageService.SendDocument(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -251,7 +256,8 @@ func (h *MessageHandler) SendDocument(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/location [post]
 func (h *MessageHandler) SendLocation(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -267,7 +273,7 @@ func (h *MessageHandler) SendLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendLocation(r.Context(), user, &req)
+	result, err := h.messageService.SendLocation(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -289,7 +295,8 @@ func (h *MessageHandler) SendLocation(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/send/contact [post]
 func (h *MessageHandler) SendContact(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -305,7 +312,7 @@ func (h *MessageHandler) SendContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.SendContact(r.Context(), user, &req)
+	result, err := h.messageService.SendContact(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -327,7 +334,8 @@ func (h *MessageHandler) SendContact(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/react [post]
 func (h *MessageHandler) React(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -348,7 +356,7 @@ func (h *MessageHandler) React(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.React(r.Context(), user, &req)
+	result, err := h.messageService.React(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -370,7 +378,8 @@ func (h *MessageHandler) React(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/delete [post]
 func (h *MessageHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -391,7 +400,7 @@ func (h *MessageHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.messageService.Delete(r.Context(), user, &req)
+	result, err := h.messageService.Delete(r.Context(), user.ID, session.ID, &req)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return

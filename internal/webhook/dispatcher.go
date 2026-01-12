@@ -13,16 +13,16 @@ import (
 
 type Dispatcher struct {
 	webhookRepo *repository.WebhookRepository
-	userRepo    *repository.UserRepository
+	sessionRepo *repository.SessionRepository
 	sender      *Sender
 	stopCh      chan struct{}
 	wg          sync.WaitGroup
 }
 
-func NewDispatcher(webhookRepo *repository.WebhookRepository, userRepo *repository.UserRepository) *Dispatcher {
+func NewDispatcher(webhookRepo *repository.WebhookRepository, sessionRepo *repository.SessionRepository) *Dispatcher {
 	return &Dispatcher{
 		webhookRepo: webhookRepo,
-		userRepo:    userRepo,
+		sessionRepo: sessionRepo,
 		sender:      NewSender(),
 		stopCh:      make(chan struct{}),
 	}
@@ -64,19 +64,25 @@ func (d *Dispatcher) processPending() {
 	}
 
 	for _, event := range events {
-		user, err := d.userRepo.GetByID(event.UserID)
+		if event.SessionID == "" {
+			logger.Warnf("Webhook %d has no session ID, skipping", event.ID)
+			d.webhookRepo.MarkFailed(event.ID)
+			continue
+		}
+
+		session, err := d.sessionRepo.GetByID(event.SessionID)
 		if err != nil {
-			logger.Warnf("User not found for webhook %d: %v", event.ID, err)
+			logger.Warnf("Session not found for webhook %d: %v", event.ID, err)
 			d.webhookRepo.MarkFailed(event.ID)
 			continue
 		}
 
-		if user.Webhook == "" {
+		if session.Webhook == "" {
 			d.webhookRepo.MarkFailed(event.ID)
 			continue
 		}
 
-		if !d.shouldSendEvent(user.Events, event.EventType) {
+		if !d.shouldSendEvent(session.Events, event.EventType) {
 			d.webhookRepo.MarkSent(event.ID)
 			continue
 		}
@@ -91,7 +97,7 @@ func (d *Dispatcher) processPending() {
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		err = d.sender.Send(ctx, user.Webhook, payload)
+		err = d.sender.Send(ctx, session.Webhook, payload)
 		cancel()
 
 		if err != nil {
@@ -119,5 +125,9 @@ func (d *Dispatcher) shouldSendEvent(subscribedEvents, eventType string) bool {
 }
 
 func (d *Dispatcher) Enqueue(userID, eventType string, data interface{}) error {
-	return d.webhookRepo.Create(userID, eventType, data)
+	return d.webhookRepo.Create(userID, "", eventType, data)
+}
+
+func (d *Dispatcher) EnqueueSession(userID, sessionID, eventType string, data interface{}) error {
+	return d.webhookRepo.Create(userID, sessionID, eventType, data)
 }

@@ -31,7 +31,8 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 // @Router /user/info [post]
 func (h *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -49,7 +50,7 @@ func (h *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.userService.GetInfo(r.Context(), user, req.Phone)
+	result, err := h.userService.GetInfo(r.Context(), user.ID, session.ID, req.Phone)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -71,7 +72,8 @@ func (h *UserHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 // @Router /user/check [post]
 func (h *UserHandler) CheckUser(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -89,7 +91,7 @@ func (h *UserHandler) CheckUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.userService.CheckUser(r.Context(), user, req.Phone)
+	result, err := h.userService.CheckUser(r.Context(), user.ID, session.ID, req.Phone)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -111,7 +113,8 @@ func (h *UserHandler) CheckUser(w http.ResponseWriter, r *http.Request) {
 // @Router /user/avatar [post]
 func (h *UserHandler) GetAvatar(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -130,7 +133,7 @@ func (h *UserHandler) GetAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.userService.GetAvatar(r.Context(), user, req.Phone, req.Preview)
+	result, err := h.userService.GetAvatar(r.Context(), user.ID, session.ID, req.Phone, req.Preview)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -150,12 +153,13 @@ func (h *UserHandler) GetAvatar(w http.ResponseWriter, r *http.Request) {
 // @Router /user/contacts [get]
 func (h *UserHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
 
-	result, err := h.userService.GetContacts(r.Context(), user)
+	result, err := h.userService.GetContacts(r.Context(), user.ID, session.ID)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -177,7 +181,8 @@ func (h *UserHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 // @Router /user/presence [post]
 func (h *UserHandler) SendPresence(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -194,7 +199,7 @@ func (h *UserHandler) SendPresence(w http.ResponseWriter, r *http.Request) {
 		req.Presence = "available"
 	}
 
-	err := h.userService.SendPresence(r.Context(), user, req.Presence)
+	err := h.userService.SendPresence(r.Context(), user.ID, session.ID, req.Presence)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return
@@ -216,7 +221,8 @@ func (h *UserHandler) SendPresence(w http.ResponseWriter, r *http.Request) {
 // @Router /chat/presence [post]
 func (h *UserHandler) ChatPresence(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
+	session := middleware.GetSessionFromContext(r.Context())
+	if user == nil || session == nil {
 		model.RespondUnauthorized(w, errors.New("user not found"))
 		return
 	}
@@ -236,7 +242,7 @@ func (h *UserHandler) ChatPresence(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.userService.ChatPresence(r.Context(), user, req.Phone, req.State, req.Media)
+	err := h.userService.ChatPresence(r.Context(), user.ID, session.ID, req.Phone, req.State, req.Media)
 	if err != nil {
 		model.RespondInternalError(w, err)
 		return

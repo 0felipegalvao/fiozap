@@ -77,6 +77,11 @@ clean:
 	@rm -rf bin/
 	@rm -f coverage.out coverage.html
 
+## Kill
+kill:
+	@echo "Killing server on port 8080..."
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || echo "No process on port 8080"
+
 ## Setup
 setup: docker-up
 	@cp -n .env.example .env 2>/dev/null || true
@@ -110,3 +115,4 @@ help:
 	@echo "  make db-reset     - Reset database (destroys data)"
 	@echo "  make setup        - Initial setup (docker + .env)"
 	@echo "  make clean        - Remove build artifacts"
+	@echo "  make kill         - Kill running fiozap processes"

@@ -26,8 +26,8 @@ func NewMessageService(sessionService *SessionService) *MessageService {
 	return &MessageService{sessionService: sessionService}
 }
 
-func (s *MessageService) SendText(ctx context.Context, user *model.User, req *model.TextMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendText(ctx context.Context, userID, sessionID string, req *model.TextMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -60,8 +60,8 @@ func (s *MessageService) SendText(ctx context.Context, user *model.User, req *mo
 	}, nil
 }
 
-func (s *MessageService) SendImage(ctx context.Context, user *model.User, req *model.ImageMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendImage(ctx context.Context, userID, sessionID string, req *model.ImageMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -122,8 +122,8 @@ func (s *MessageService) SendImage(ctx context.Context, user *model.User, req *m
 	}, nil
 }
 
-func (s *MessageService) SendAudio(ctx context.Context, user *model.User, req *model.AudioMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendAudio(ctx context.Context, userID, sessionID string, req *model.AudioMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -193,8 +193,8 @@ func (s *MessageService) SendAudio(ctx context.Context, user *model.User, req *m
 	}, nil
 }
 
-func (s *MessageService) SendVideo(ctx context.Context, user *model.User, req *model.VideoMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendVideo(ctx context.Context, userID, sessionID string, req *model.VideoMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -255,8 +255,8 @@ func (s *MessageService) SendVideo(ctx context.Context, user *model.User, req *m
 	}, nil
 }
 
-func (s *MessageService) SendDocument(ctx context.Context, user *model.User, req *model.DocumentMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendDocument(ctx context.Context, userID, sessionID string, req *model.DocumentMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -318,8 +318,8 @@ func (s *MessageService) SendDocument(ctx context.Context, user *model.User, req
 	}, nil
 }
 
-func (s *MessageService) SendLocation(ctx context.Context, user *model.User, req *model.LocationMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendLocation(ctx context.Context, userID, sessionID string, req *model.LocationMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -355,8 +355,8 @@ func (s *MessageService) SendLocation(ctx context.Context, user *model.User, req
 	}, nil
 }
 
-func (s *MessageService) SendContact(ctx context.Context, user *model.User, req *model.ContactMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) SendContact(ctx context.Context, userID, sessionID string, req *model.ContactMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -390,8 +390,8 @@ func (s *MessageService) SendContact(ctx context.Context, user *model.User, req 
 	}, nil
 }
 
-func (s *MessageService) React(ctx context.Context, user *model.User, req *model.ReactionMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) React(ctx context.Context, userID, sessionID string, req *model.ReactionMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -423,8 +423,8 @@ func (s *MessageService) React(ctx context.Context, user *model.User, req *model
 	}, nil
 }
 
-func (s *MessageService) Delete(ctx context.Context, user *model.User, req *model.DeleteMessage) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *MessageService) Delete(ctx context.Context, userID, sessionID string, req *model.DeleteMessage) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}

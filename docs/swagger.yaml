@@ -13,15 +13,6 @@ definitions:
       ptt:
         type: boolean
     type: object
-  model.ConnectRequest:
-    properties:
-      immediate:
-        type: boolean
-      subscribe:
-        items:
-          type: string
-        type: array
-    type: object
   model.ContactMessage:
     properties:
       contact_name:
@@ -107,6 +98,36 @@ definitions:
       success:
         type: boolean
     type: object
+  model.SessionConnectRequest:
+    properties:
+      immediate:
+        example: true
+        type: boolean
+    type: object
+  model.SessionCreateRequest:
+    properties:
+      events:
+        type: string
+      name:
+        type: string
+      proxyUrl:
+        type: string
+      webhook:
+        type: string
+    required:
+    - name
+    type: object
+  model.SessionUpdateRequest:
+    properties:
+      events:
+        type: string
+      name:
+        type: string
+      proxyUrl:
+        type: string
+      webhook:
+        type: string
+    type: object
   model.TextMessage:
     properties:
       id:
@@ -118,24 +139,23 @@ definitions:
     type: object
   model.UserCreateRequest:
     properties:
-      events:
-        type: string
+      maxSessions:
+        example: 5
+        type: integer
       name:
+        example: Felipe
         type: string
       token:
-        type: string
-      webhook:
+        example: abc123xyz
         type: string
     type: object
   model.UserUpdateRequest:
     properties:
-      events:
-        type: string
+      maxSessions:
+        type: integer
       name:
         type: string
       token:
-        type: string
-      webhook:
         type: string
     type: object
   model.VideoMessage:
@@ -173,6 +193,25 @@ info:
   title: FioZap API
   version: "1.0"
 paths:
+  /admin/sessions:
+    get:
+      description: List all WhatsApp sessions from all users (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - AdminKeyAuth: []
+      summary: List all sessions (admin)
+      tags:
+      - Admin
   /admin/users:
     get:
       description: Get all users or a specific user by ID
@@ -188,7 +227,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       security:
-      - AdminAuth: []
+      - AdminKeyAuth: []
       summary: List users or get single user
       tags:
       - Admin
@@ -215,7 +254,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       security:
-      - AdminAuth: []
+      - AdminKeyAuth: []
       summary: Create new user
       tags:
       - Admin
@@ -240,7 +279,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       security:
-      - AdminAuth: []
+      - AdminKeyAuth: []
       summary: Delete user
       tags:
       - Admin
@@ -263,7 +302,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       security:
-      - AdminAuth: []
+      - AdminKeyAuth: []
       summary: List users or get single user
       tags:
       - Admin
@@ -295,7 +334,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       security:
-      - AdminAuth: []
+      - AdminKeyAuth: []
       summary: Update user
       tags:
       - Admin
@@ -838,17 +877,165 @@ paths:
       summary: Health check
       tags:
       - Health
-  /session/connect:
+  /sessions:
+    get:
+      description: List all WhatsApp sessions for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: List all sessions
+      tags:
+      - Sessions
+    post:
+      consumes:
+      - application/json
+      description: Create a new WhatsApp session
+      parameters:
+      - description: Session data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SessionCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new session
+      tags:
+      - Sessions
+  /sessions/{sessionId}:
+    delete:
+      description: Delete a WhatsApp session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete session
+      tags:
+      - Sessions
+    get:
+      description: Get details of a specific WhatsApp session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get session details
+      tags:
+      - Sessions
+    put:
+      consumes:
+      - application/json
+      description: Update a WhatsApp session configuration
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Session data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SessionUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update session
+      tags:
+      - Sessions
+  /sessions/{sessionId}/connect:
     post:
       consumes:
       - application/json
       description: Connect and start a WhatsApp session
       parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       - description: Connection options
         in: body
         name: request
         schema:
-          $ref: '#/definitions/model.ConnectRequest'
+          $ref: '#/definitions/model.SessionConnectRequest'
       produces:
       - application/json
       responses:
@@ -864,10 +1051,16 @@ paths:
       - ApiKeyAuth: []
       summary: Connect WhatsApp session
       tags:
-      - Session
-  /session/disconnect:
+      - Sessions
+  /sessions/{sessionId}/disconnect:
     post:
-      description: Disconnect the current WhatsApp session
+      description: Disconnect the WhatsApp session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -883,10 +1076,16 @@ paths:
       - ApiKeyAuth: []
       summary: Disconnect WhatsApp session
       tags:
-      - Session
-  /session/logout:
+      - Sessions
+  /sessions/{sessionId}/logout:
     post:
       description: Logout and clear WhatsApp session data
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -902,13 +1101,18 @@ paths:
       - ApiKeyAuth: []
       summary: Logout WhatsApp session
       tags:
-      - Session
-  /session/pairphone:
+      - Sessions
+  /sessions/{sessionId}/pairphone:
     post:
       consumes:
       - application/json
       description: Get pairing code for phone number authentication
       parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       - description: Phone number
         in: body
         name: request
@@ -930,10 +1134,16 @@ paths:
       - ApiKeyAuth: []
       summary: Pair with phone number
       tags:
-      - Session
-  /session/qr:
+      - Sessions
+  /sessions/{sessionId}/qr:
     get:
       description: Get QR code for WhatsApp authentication
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -949,10 +1159,16 @@ paths:
       - ApiKeyAuth: []
       summary: Get QR code
       tags:
-      - Session
-  /session/status:
+      - Sessions
+  /sessions/{sessionId}/status:
     get:
-      description: Get the current WhatsApp session status
+      description: Get the WhatsApp session status
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -968,7 +1184,129 @@ paths:
       - ApiKeyAuth: []
       summary: Get session status
       tags:
-      - Session
+      - Sessions
+  /sessions/{sessionId}/webhook:
+    delete:
+      description: Remove webhook URL and unsubscribe from all events for the session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete webhook configuration
+      tags:
+      - Webhook
+    get:
+      description: Get current webhook URL and subscribed events for the session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get webhook configuration
+      tags:
+      - Webhook
+    post:
+      consumes:
+      - application/json
+      description: Configure webhook URL and events to subscribe for the session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Webhook configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.WebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Set webhook configuration
+      tags:
+      - Webhook
+    put:
+      consumes:
+      - application/json
+      description: Update webhook URL, events and active status for the session
+      parameters:
+      - description: Session name
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Webhook update data
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            active:
+              type: boolean
+            events:
+              items:
+                type: string
+              type: array
+            webhook:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update webhook configuration
+      tags:
+      - Webhook
   /user/avatar:
     post:
       consumes:
@@ -1118,112 +1456,14 @@ paths:
       summary: Send presence
       tags:
       - User
-  /webhook:
-    delete:
-      description: Remove webhook URL and unsubscribe from all events
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Delete webhook configuration
-      tags:
-      - Webhook
-    get:
-      description: Get current webhook URL and subscribed events
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Get webhook configuration
-      tags:
-      - Webhook
-    post:
-      consumes:
-      - application/json
-      description: Configure webhook URL and events to subscribe
-      parameters:
-      - description: Webhook configuration
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.WebhookRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Set webhook configuration
-      tags:
-      - Webhook
-    put:
-      consumes:
-      - application/json
-      description: Update webhook URL, events and active status
-      parameters:
-      - description: Webhook update data
-        in: body
-        name: request
-        required: true
-        schema:
-          properties:
-            active:
-              type: boolean
-            events:
-              items:
-                type: string
-              type: array
-            webhook:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Update webhook configuration
-      tags:
-      - Webhook
 securityDefinitions:
-  AdminAuth:
+  AdminKeyAuth:
+    description: Admin token for user management
     in: header
-    name: Token
+    name: Authorization
     type: apiKey
   ApiKeyAuth:
+    description: User API token for session operations
     in: header
     name: Token
     type: apiKey

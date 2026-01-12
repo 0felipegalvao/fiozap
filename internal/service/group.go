@@ -8,8 +8,6 @@ import (
 
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/types"
-
-	"fiozap/internal/model"
 )
 
 type GroupService struct {
@@ -20,8 +18,8 @@ func NewGroupService(sessionService *SessionService) *GroupService {
 	return &GroupService{sessionService: sessionService}
 }
 
-func (s *GroupService) Create(ctx context.Context, user *model.User, name string, participants []string) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) Create(ctx context.Context, userID, sessionID string, name string, participants []string) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -51,8 +49,8 @@ func (s *GroupService) Create(ctx context.Context, user *model.User, name string
 	}, nil
 }
 
-func (s *GroupService) List(ctx context.Context, user *model.User) ([]map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) List(ctx context.Context, userID, sessionID string) ([]map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -77,8 +75,8 @@ func (s *GroupService) List(ctx context.Context, user *model.User) ([]map[string
 	return result, nil
 }
 
-func (s *GroupService) GetInfo(ctx context.Context, user *model.User, groupJID string) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) GetInfo(ctx context.Context, userID, sessionID string, groupJID string) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -114,8 +112,8 @@ func (s *GroupService) GetInfo(ctx context.Context, user *model.User, groupJID s
 	}, nil
 }
 
-func (s *GroupService) GetInviteLink(ctx context.Context, user *model.User, groupJID string) (map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) GetInviteLink(ctx context.Context, userID, sessionID string, groupJID string) (map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -135,8 +133,8 @@ func (s *GroupService) GetInviteLink(ctx context.Context, user *model.User, grou
 	}, nil
 }
 
-func (s *GroupService) Leave(ctx context.Context, user *model.User, groupJID string) error {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) Leave(ctx context.Context, userID, sessionID string, groupJID string) error {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return errors.New("no session")
 	}
@@ -149,8 +147,8 @@ func (s *GroupService) Leave(ctx context.Context, user *model.User, groupJID str
 	return client.LeaveGroup(ctx, jid)
 }
 
-func (s *GroupService) UpdateParticipants(ctx context.Context, user *model.User, groupJID string, participants []string, action string) ([]map[string]interface{}, error) {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) UpdateParticipants(ctx context.Context, userID, sessionID string, groupJID string, participants []string, action string) ([]map[string]interface{}, error) {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return nil, errors.New("no session")
 	}
@@ -199,8 +197,8 @@ func (s *GroupService) UpdateParticipants(ctx context.Context, user *model.User,
 	return result, nil
 }
 
-func (s *GroupService) SetName(ctx context.Context, user *model.User, groupJID, name string) error {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) SetName(ctx context.Context, userID, sessionID string, groupJID, name string) error {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return errors.New("no session")
 	}
@@ -213,8 +211,8 @@ func (s *GroupService) SetName(ctx context.Context, user *model.User, groupJID, 
 	return client.SetGroupName(ctx, jid, name)
 }
 
-func (s *GroupService) SetTopic(ctx context.Context, user *model.User, groupJID, topic string) error {
-	client := s.sessionService.GetWhatsmeowClient(user.ID)
+func (s *GroupService) SetTopic(ctx context.Context, userID, sessionID string, groupJID, topic string) error {
+	client := s.sessionService.GetWhatsmeowClient(userID, sessionID)
 	if client == nil {
 		return errors.New("no session")
 	}

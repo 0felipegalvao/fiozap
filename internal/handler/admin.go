@@ -27,7 +27,7 @@ func NewAdminHandler(userRepo *repository.UserRepository) *AdminHandler {
 // @Param id path string false "User ID"
 // @Success 200 {object} model.Response
 // @Failure 404 {object} model.Response
-// @Security AdminAuth
+// @Security AdminKeyAuth
 // @Router /admin/users [get]
 // @Router /admin/users/{id} [get]
 func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +62,7 @@ func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 // @Param user body model.UserCreateRequest true "User data"
 // @Success 201 {object} model.Response
 // @Failure 400 {object} model.Response
-// @Security AdminAuth
+// @Security AdminKeyAuth
 // @Router /admin/users [post]
 func (h *AdminHandler) AddUser(w http.ResponseWriter, r *http.Request) {
 	var req model.UserCreateRequest
@@ -100,7 +100,7 @@ func (h *AdminHandler) AddUser(w http.ResponseWriter, r *http.Request) {
 // @Param user body model.UserUpdateRequest true "User data"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
-// @Security AdminAuth
+// @Security AdminKeyAuth
 // @Router /admin/users/{id} [put]
 func (h *AdminHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -129,7 +129,7 @@ func (h *AdminHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "User ID"
 // @Success 200 {object} model.Response
 // @Failure 500 {object} model.Response
-// @Security AdminAuth
+// @Security AdminKeyAuth
 // @Router /admin/users/{id} [delete]
 func (h *AdminHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

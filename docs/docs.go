@@ -23,11 +23,42 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/sessions": {
+            "get": {
+                "security": [
+                    {
+                        "AdminKeyAuth": []
+                    }
+                ],
+                "description": "List all WhatsApp sessions from all users (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all sessions (admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/users": {
             "get": {
                 "security": [
                     {
-                        "AdminAuth": []
+                        "AdminKeyAuth": []
                     }
                 ],
                 "description": "Get all users or a specific user by ID",
@@ -56,7 +87,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "AdminAuth": []
+                        "AdminKeyAuth": []
                     }
                 ],
                 "description": "Create a new API user",
@@ -101,7 +132,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "AdminAuth": []
+                        "AdminKeyAuth": []
                     }
                 ],
                 "description": "Get all users or a specific user by ID",
@@ -138,7 +169,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "AdminAuth": []
+                        "AdminKeyAuth": []
                     }
                 ],
                 "description": "Update an existing user",
@@ -188,7 +219,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "AdminAuth": []
+                        "AdminKeyAuth": []
                     }
                 ],
                 "description": "Delete a user by ID",
@@ -1088,7 +1119,233 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/connect": {
+        "/sessions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "List all WhatsApp sessions for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "List all sessions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create a new WhatsApp session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Create a new session",
+                "parameters": [
+                    {
+                        "description": "Session data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SessionCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/{sessionId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get details of a specific WhatsApp session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Get session details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update a WhatsApp session configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Update session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Session data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SessionUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a WhatsApp session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Delete session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/{sessionId}/connect": {
             "post": {
                 "security": [
                     {
@@ -1103,16 +1360,23 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Connect WhatsApp session",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Connection options",
                         "name": "request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/model.ConnectRequest"
+                            "$ref": "#/definitions/model.SessionConnectRequest"
                         }
                     }
                 ],
@@ -1132,21 +1396,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/disconnect": {
+        "/sessions/{sessionId}/disconnect": {
             "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Disconnect the current WhatsApp session",
+                "description": "Disconnect the WhatsApp session",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Disconnect WhatsApp session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1163,7 +1436,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/logout": {
+        "/sessions/{sessionId}/logout": {
             "post": {
                 "security": [
                     {
@@ -1175,9 +1448,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Logout WhatsApp session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1194,7 +1476,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/pairphone": {
+        "/sessions/{sessionId}/pairphone": {
             "post": {
                 "security": [
                     {
@@ -1209,10 +1491,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Pair with phone number",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Phone number",
                         "name": "request",
@@ -1239,7 +1528,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/qr": {
+        "/sessions/{sessionId}/qr": {
             "get": {
                 "security": [
                     {
@@ -1251,9 +1540,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Get QR code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1270,21 +1568,222 @@ const docTemplate = `{
                 }
             }
         },
-        "/session/status": {
+        "/sessions/{sessionId}/status": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get the current WhatsApp session status",
+                "description": "Get the WhatsApp session status",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Session"
+                    "Sessions"
                 ],
                 "summary": "Get session status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/{sessionId}/webhook": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get current webhook URL and subscribed events for the session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Get webhook configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update webhook URL, events and active status for the session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Update webhook configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Webhook update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "active": {
+                                    "type": "boolean"
+                                },
+                                "events": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "webhook": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Configure webhook URL and events to subscribe for the session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Set webhook configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Webhook configuration",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.WebhookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Remove webhook URL and unsubscribe from all events for the session",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhook"
+                ],
+                "summary": "Delete webhook configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session name",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1540,166 +2039,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/webhook": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get current webhook URL and subscribed events",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhook"
-                ],
-                "summary": "Get webhook configuration",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Update webhook URL, events and active status",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhook"
-                ],
-                "summary": "Update webhook configuration",
-                "parameters": [
-                    {
-                        "description": "Webhook update data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "active": {
-                                    "type": "boolean"
-                                },
-                                "events": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "webhook": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Configure webhook URL and events to subscribe",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhook"
-                ],
-                "summary": "Set webhook configuration",
-                "parameters": [
-                    {
-                        "description": "Webhook configuration",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.WebhookRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Remove webhook URL and unsubscribe from all events",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhook"
-                ],
-                "summary": "Delete webhook configuration",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.Response"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -1720,20 +2059,6 @@ const docTemplate = `{
                 },
                 "ptt": {
                     "type": "boolean"
-                }
-            }
-        },
-        "model.ConnectRequest": {
-            "type": "object",
-            "properties": {
-                "immediate": {
-                    "type": "boolean"
-                },
-                "subscribe": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -1868,6 +2193,52 @@ const docTemplate = `{
                 }
             }
         },
+        "model.SessionConnectRequest": {
+            "type": "object",
+            "properties": {
+                "immediate": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "model.SessionCreateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "events": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "proxyUrl": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SessionUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "proxyUrl": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
+                }
+            }
+        },
         "model.TextMessage": {
             "type": "object",
             "properties": {
@@ -1885,33 +2256,30 @@ const docTemplate = `{
         "model.UserCreateRequest": {
             "type": "object",
             "properties": {
-                "events": {
-                    "type": "string"
+                "maxSessions": {
+                    "type": "integer",
+                    "example": 5
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Felipe"
                 },
                 "token": {
-                    "type": "string"
-                },
-                "webhook": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "abc123xyz"
                 }
             }
         },
         "model.UserUpdateRequest": {
             "type": "object",
             "properties": {
-                "events": {
-                    "type": "string"
+                "maxSessions": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                },
-                "webhook": {
                     "type": "string"
                 }
             }
@@ -1952,12 +2320,14 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "AdminAuth": {
+        "AdminKeyAuth": {
+            "description": "Admin token for user management",
             "type": "apiKey",
-            "name": "Token",
+            "name": "Authorization",
             "in": "header"
         },
         "ApiKeyAuth": {
+            "description": "User API token for session operations",
             "type": "apiKey",
             "name": "Token",
             "in": "header"

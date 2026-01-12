@@ -34,10 +34,12 @@ import (
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Token
+// @description User API token for session operations
 
-// @securityDefinitions.apikey AdminAuth
+// @securityDefinitions.apikey AdminKeyAuth
 // @in header
-// @name Token
+// @name Authorization
+// @description Admin token for user management
 
 func main() {
 	ctx := context.Background()

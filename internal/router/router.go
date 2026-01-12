@@ -25,18 +25,20 @@ func New(cfg *config.Config, db *sqlx.DB) *Router {
 	r := mux.NewRouter()
 
 	userRepo := repository.NewUserRepository(db)
+	sessionRepo := repository.NewSessionRepository(db)
 	webhookRepo := repository.NewWebhookRepository(db)
 
 	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 	adminMiddleware := middleware.NewAdminMiddleware(cfg.AdminToken)
+	sessionMiddleware := middleware.NewSessionMiddleware(sessionRepo)
 
 	healthHandler := handler.NewHealthHandler()
 	adminHandler := handler.NewAdminHandler(userRepo)
 
-	sessionService := service.NewSessionService(userRepo, cfg)
+	sessionService := service.NewSessionService(userRepo, sessionRepo, cfg)
 	sessionService.SetWebhookRepo(webhookRepo)
 
-	dispatcher := webhook.NewDispatcher(webhookRepo, userRepo)
+	dispatcher := webhook.NewDispatcher(webhookRepo, sessionRepo)
 	sessionService.SetDispatcher(dispatcher)
 
 	sessionHandler := handler.NewSessionHandler(sessionService)
@@ -50,7 +52,7 @@ func New(cfg *config.Config, db *sqlx.DB) *Router {
 	groupService := service.NewGroupService(sessionService)
 	groupHandler := handler.NewGroupHandler(groupService)
 
-	webhookHandler := handler.NewWebhookHandler(userRepo)
+	webhookHandler := handler.NewWebhookHandler(sessionRepo)
 
 	r.Use(cors)
 	r.Use(middleware.Logging)
@@ -58,6 +60,7 @@ func New(cfg *config.Config, db *sqlx.DB) *Router {
 	r.HandleFunc("/health", healthHandler.GetHealth).Methods("GET")
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	// Admin routes
 	admin := r.PathPrefix("/admin").Subrouter()
 	admin.Use(adminMiddleware.Authenticate)
 	admin.HandleFunc("/users", adminHandler.ListUsers).Methods("GET")
@@ -65,52 +68,67 @@ func New(cfg *config.Config, db *sqlx.DB) *Router {
 	admin.HandleFunc("/users", adminHandler.AddUser).Methods("POST")
 	admin.HandleFunc("/users/{id}", adminHandler.EditUser).Methods("PUT")
 	admin.HandleFunc("/users/{id}", adminHandler.DeleteUser).Methods("DELETE")
+	admin.HandleFunc("/sessions", sessionHandler.AdminListAllSessions).Methods("GET")
 
+	// API routes (authenticated)
 	api := r.PathPrefix("").Subrouter()
 	api.Use(authMiddleware.Authenticate)
 
-	// Session
-	api.HandleFunc("/session/connect", sessionHandler.Connect).Methods("POST")
-	api.HandleFunc("/session/disconnect", sessionHandler.Disconnect).Methods("POST")
-	api.HandleFunc("/session/logout", sessionHandler.Logout).Methods("POST")
-	api.HandleFunc("/session/status", sessionHandler.GetStatus).Methods("GET")
-	api.HandleFunc("/session/qr", sessionHandler.GetQR).Methods("GET")
-	api.HandleFunc("/session/pairphone", sessionHandler.PairPhone).Methods("POST")
+	// Sessions CRUD (user manages own sessions)
+	api.HandleFunc("/sessions", sessionHandler.ListSessions).Methods("GET")
+	api.HandleFunc("/sessions", sessionHandler.CreateSession).Methods("POST")
 
-	// Messages
-	api.HandleFunc("/chat/send/text", messageHandler.SendText).Methods("POST")
-	api.HandleFunc("/chat/send/image", messageHandler.SendImage).Methods("POST")
-	api.HandleFunc("/chat/send/audio", messageHandler.SendAudio).Methods("POST")
-	api.HandleFunc("/chat/send/video", messageHandler.SendVideo).Methods("POST")
-	api.HandleFunc("/chat/send/document", messageHandler.SendDocument).Methods("POST")
-	api.HandleFunc("/chat/send/location", messageHandler.SendLocation).Methods("POST")
-	api.HandleFunc("/chat/send/contact", messageHandler.SendContact).Methods("POST")
-	api.HandleFunc("/chat/react", messageHandler.React).Methods("POST")
-	api.HandleFunc("/chat/delete", messageHandler.Delete).Methods("POST")
+	// Session-specific routes (require session validation)
+	sessionRoutes := api.PathPrefix("/sessions/{sessionId}").Subrouter()
+	sessionRoutes.Use(sessionMiddleware.ValidateSession)
 
-	// User
-	api.HandleFunc("/user/info", userHandler.GetInfo).Methods("POST")
-	api.HandleFunc("/user/check", userHandler.CheckUser).Methods("POST")
-	api.HandleFunc("/user/avatar", userHandler.GetAvatar).Methods("POST")
-	api.HandleFunc("/user/contacts", userHandler.GetContacts).Methods("GET")
-	api.HandleFunc("/user/presence", userHandler.SendPresence).Methods("POST")
-	api.HandleFunc("/chat/presence", userHandler.ChatPresence).Methods("POST")
+	// Session management
+	sessionRoutes.HandleFunc("", sessionHandler.GetSession).Methods("GET")
+	sessionRoutes.HandleFunc("", sessionHandler.UpdateSession).Methods("PUT")
+	sessionRoutes.HandleFunc("", sessionHandler.DeleteSession).Methods("DELETE")
 
-	// Group
-	api.HandleFunc("/group/create", groupHandler.Create).Methods("POST")
-	api.HandleFunc("/group/list", groupHandler.List).Methods("GET")
-	api.HandleFunc("/group/info", groupHandler.GetInfo).Methods("GET")
-	api.HandleFunc("/group/invitelink", groupHandler.GetInviteLink).Methods("GET")
-	api.HandleFunc("/group/leave", groupHandler.Leave).Methods("POST")
-	api.HandleFunc("/group/updateparticipants", groupHandler.UpdateParticipants).Methods("POST")
-	api.HandleFunc("/group/name", groupHandler.SetName).Methods("POST")
-	api.HandleFunc("/group/topic", groupHandler.SetTopic).Methods("POST")
+	// Session connection
+	sessionRoutes.HandleFunc("/connect", sessionHandler.Connect).Methods("POST")
+	sessionRoutes.HandleFunc("/disconnect", sessionHandler.Disconnect).Methods("POST")
+	sessionRoutes.HandleFunc("/logout", sessionHandler.Logout).Methods("POST")
+	sessionRoutes.HandleFunc("/status", sessionHandler.GetStatus).Methods("GET")
+	sessionRoutes.HandleFunc("/qr", sessionHandler.GetQR).Methods("GET")
+	sessionRoutes.HandleFunc("/pairphone", sessionHandler.PairPhone).Methods("POST")
 
-	// Webhook
-	api.HandleFunc("/webhook", webhookHandler.Get).Methods("GET")
-	api.HandleFunc("/webhook", webhookHandler.Set).Methods("POST")
-	api.HandleFunc("/webhook", webhookHandler.Update).Methods("PUT")
-	api.HandleFunc("/webhook", webhookHandler.Delete).Methods("DELETE")
+	// Messages (per session)
+	sessionRoutes.HandleFunc("/messages/text", messageHandler.SendText).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/image", messageHandler.SendImage).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/audio", messageHandler.SendAudio).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/video", messageHandler.SendVideo).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/document", messageHandler.SendDocument).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/location", messageHandler.SendLocation).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/contact", messageHandler.SendContact).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/reaction", messageHandler.React).Methods("POST")
+	sessionRoutes.HandleFunc("/messages/delete", messageHandler.Delete).Methods("POST")
+
+	// User operations (per session)
+	sessionRoutes.HandleFunc("/user/info", userHandler.GetInfo).Methods("POST")
+	sessionRoutes.HandleFunc("/user/check", userHandler.CheckUser).Methods("POST")
+	sessionRoutes.HandleFunc("/user/avatar", userHandler.GetAvatar).Methods("POST")
+	sessionRoutes.HandleFunc("/user/contacts", userHandler.GetContacts).Methods("GET")
+	sessionRoutes.HandleFunc("/user/presence", userHandler.SendPresence).Methods("POST")
+	sessionRoutes.HandleFunc("/chat/presence", userHandler.ChatPresence).Methods("POST")
+
+	// Group operations (per session)
+	sessionRoutes.HandleFunc("/group/create", groupHandler.Create).Methods("POST")
+	sessionRoutes.HandleFunc("/group/list", groupHandler.List).Methods("GET")
+	sessionRoutes.HandleFunc("/group/info", groupHandler.GetInfo).Methods("GET")
+	sessionRoutes.HandleFunc("/group/invitelink", groupHandler.GetInviteLink).Methods("GET")
+	sessionRoutes.HandleFunc("/group/leave", groupHandler.Leave).Methods("POST")
+	sessionRoutes.HandleFunc("/group/updateparticipants", groupHandler.UpdateParticipants).Methods("POST")
+	sessionRoutes.HandleFunc("/group/name", groupHandler.SetName).Methods("POST")
+	sessionRoutes.HandleFunc("/group/topic", groupHandler.SetTopic).Methods("POST")
+
+	// Webhook (per session)
+	sessionRoutes.HandleFunc("/webhook", webhookHandler.Get).Methods("GET")
+	sessionRoutes.HandleFunc("/webhook", webhookHandler.Set).Methods("POST")
+	sessionRoutes.HandleFunc("/webhook", webhookHandler.Update).Methods("PUT")
+	sessionRoutes.HandleFunc("/webhook", webhookHandler.Delete).Methods("DELETE")
 
 	return &Router{
 		mux:            r,

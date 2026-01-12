@@ -10,6 +10,7 @@ import (
 type WebhookEvent struct {
 	ID          int64           `db:"id"`
 	UserID      string          `db:"userId"`
+	SessionID   string          `db:"sessionId"`
 	EventType   string          `db:"eventType"`
 	Payload     json.RawMessage `db:"payload"`
 	Status      string          `db:"status"`
@@ -26,24 +27,24 @@ func NewWebhookRepository(db *sqlx.DB) *WebhookRepository {
 	return &WebhookRepository{db: db}
 }
 
-func (r *WebhookRepository) Create(userID, eventType string, payload interface{}) error {
+func (r *WebhookRepository) Create(userID, sessionID, eventType string, payload interface{}) error {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
 	query := `
-		INSERT INTO "fzWebhook" ("userId", "eventType", "payload", "status", "attempts", "createdAt")
-		VALUES ($1, $2, $3, 'pending', 0, NOW())
+		INSERT INTO "fzWebhook" ("userId", "sessionId", "eventType", "payload", "status", "attempts", "createdAt")
+		VALUES ($1, $2, $3, $4, 'pending', 0, NOW())
 	`
-	_, err = r.db.Exec(query, userID, eventType, payloadBytes)
+	_, err = r.db.Exec(query, userID, sessionID, eventType, payloadBytes)
 	return err
 }
 
 func (r *WebhookRepository) GetPending(limit int) ([]WebhookEvent, error) {
 	var events []WebhookEvent
 	query := `
-		SELECT "id", "userId", "eventType", "payload", "status", "attempts", "lastAttempt", "createdAt"
+		SELECT "id", "userId", COALESCE("sessionId", '') as "sessionId", "eventType", "payload", "status", "attempts", "lastAttempt", "createdAt"
 		FROM "fzWebhook"
 		WHERE "status" = 'pending' AND "attempts" < 3
 		ORDER BY "createdAt" ASC

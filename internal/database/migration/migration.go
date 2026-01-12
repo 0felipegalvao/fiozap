@@ -9,7 +9,7 @@ import (
 	"fiozap/internal/logger"
 )
 
-const VersionTable = "fzVersion"
+const VersionTable = "fzversion"
 
 func Run(ctx context.Context, db *dbutil.Database) error {
 	logger.Info("Running database migrations...")

@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS "fzMessage" (
     "id" SERIAL PRIMARY KEY,
     "userId" VARCHAR(64) NOT NULL,
+    "sessionId" VARCHAR(64),
     "chatJid" VARCHAR(255) NOT NULL,
     "senderJid" VARCHAR(255) NOT NULL,
     "messageId" VARCHAR(255) NOT NULL,
@@ -11,8 +12,8 @@ CREATE TABLE IF NOT EXISTS "fzMessage" (
     "textContent" TEXT,
     "mediaLink" TEXT,
     "quotedMessageId" VARCHAR(255),
-    UNIQUE("userId", "messageId")
+    UNIQUE("sessionId", "messageId")
 );
 
-CREATE INDEX IF NOT EXISTS "idxFzMessageUserChat" 
-ON "fzMessage" ("userId", "chatJid", "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS "idxFzMessageSessionChat" 
+ON "fzMessage" ("sessionId", "chatJid", "timestamp" DESC);

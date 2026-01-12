@@ -28,55 +28,57 @@ var supportedEventTypes = []string{
 }
 
 type WebhookHandler struct {
-	userRepo *repository.UserRepository
+	sessionRepo *repository.SessionRepository
 }
 
-func NewWebhookHandler(userRepo *repository.UserRepository) *WebhookHandler {
-	return &WebhookHandler{userRepo: userRepo}
+func NewWebhookHandler(sessionRepo *repository.SessionRepository) *WebhookHandler {
+	return &WebhookHandler{sessionRepo: sessionRepo}
 }
 
 // Get godoc
 // @Summary Get webhook configuration
-// @Description Get current webhook URL and subscribed events
+// @Description Get current webhook URL and subscribed events for the session
 // @Tags Webhook
 // @Produce json
+// @Param sessionId path string true "Session name"
 // @Success 200 {object} model.Response
 // @Failure 401 {object} model.Response
 // @Security ApiKeyAuth
-// @Router /webhook [get]
+// @Router /sessions/{sessionId}/webhook [get]
 func (h *WebhookHandler) Get(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
-		model.RespondUnauthorized(w, errors.New("user not found"))
+	session := middleware.GetSessionFromContext(r.Context())
+	if session == nil {
+		model.RespondUnauthorized(w, errors.New("session not found"))
 		return
 	}
 
 	var events []string
-	if user.Events != "" {
-		events = strings.Split(user.Events, ",")
+	if session.Events != "" {
+		events = strings.Split(session.Events, ",")
 	}
 
 	model.RespondOK(w, map[string]interface{}{
-		"webhook":   user.Webhook,
+		"webhook":   session.Webhook,
 		"subscribe": events,
 	})
 }
 
 // Set godoc
 // @Summary Set webhook configuration
-// @Description Configure webhook URL and events to subscribe
+// @Description Configure webhook URL and events to subscribe for the session
 // @Tags Webhook
 // @Accept json
 // @Produce json
+// @Param sessionId path string true "Session name"
 // @Param request body model.WebhookRequest true "Webhook configuration"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Security ApiKeyAuth
-// @Router /webhook [post]
+// @Router /sessions/{sessionId}/webhook [post]
 func (h *WebhookHandler) Set(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
-		model.RespondUnauthorized(w, errors.New("user not found"))
+	session := middleware.GetSessionFromContext(r.Context())
+	if session == nil {
+		model.RespondUnauthorized(w, errors.New("session not found"))
 		return
 	}
 
@@ -95,12 +97,10 @@ func (h *WebhookHandler) Set(w http.ResponseWriter, r *http.Request) {
 
 	eventString := strings.Join(validEvents, ",")
 
-	if err := h.userRepo.UpdateWebhook(user.ID, req.WebhookURL, eventString); err != nil {
+	if err := h.sessionRepo.UpdateWebhook(session.ID, req.WebhookURL, eventString); err != nil {
 		model.RespondInternalError(w, err)
 		return
 	}
-
-	middleware.InvalidateUserCache(user.Token)
 
 	model.RespondOK(w, map[string]interface{}{
 		"webhook": req.WebhookURL,
@@ -110,19 +110,20 @@ func (h *WebhookHandler) Set(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary Update webhook configuration
-// @Description Update webhook URL, events and active status
+// @Description Update webhook URL, events and active status for the session
 // @Tags Webhook
 // @Accept json
 // @Produce json
+// @Param sessionId path string true "Session name"
 // @Param request body object{webhook=string,events=[]string,active=bool} true "Webhook update data"
 // @Success 200 {object} model.Response
 // @Failure 400 {object} model.Response
 // @Security ApiKeyAuth
-// @Router /webhook [put]
+// @Router /sessions/{sessionId}/webhook [put]
 func (h *WebhookHandler) Update(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
-		model.RespondUnauthorized(w, errors.New("user not found"))
+	session := middleware.GetSessionFromContext(r.Context())
+	if session == nil {
+		model.RespondUnauthorized(w, errors.New("session not found"))
 		return
 	}
 
@@ -152,12 +153,10 @@ func (h *WebhookHandler) Update(w http.ResponseWriter, r *http.Request) {
 		eventString = ""
 	}
 
-	if err := h.userRepo.UpdateWebhook(user.ID, webhook, eventString); err != nil {
+	if err := h.sessionRepo.UpdateWebhook(session.ID, webhook, eventString); err != nil {
 		model.RespondInternalError(w, err)
 		return
 	}
-
-	middleware.InvalidateUserCache(user.Token)
 
 	model.RespondOK(w, map[string]interface{}{
 		"webhook": webhook,
@@ -168,26 +167,25 @@ func (h *WebhookHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 // Delete godoc
 // @Summary Delete webhook configuration
-// @Description Remove webhook URL and unsubscribe from all events
+// @Description Remove webhook URL and unsubscribe from all events for the session
 // @Tags Webhook
 // @Produce json
+// @Param sessionId path string true "Session name"
 // @Success 200 {object} model.Response
 // @Failure 401 {object} model.Response
 // @Security ApiKeyAuth
-// @Router /webhook [delete]
+// @Router /sessions/{sessionId}/webhook [delete]
 func (h *WebhookHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	user := middleware.GetUserFromContext(r.Context())
-	if user == nil {
-		model.RespondUnauthorized(w, errors.New("user not found"))
+	session := middleware.GetSessionFromContext(r.Context())
+	if session == nil {
+		model.RespondUnauthorized(w, errors.New("session not found"))
 		return
 	}
 
-	if err := h.userRepo.UpdateWebhook(user.ID, "", ""); err != nil {
+	if err := h.sessionRepo.UpdateWebhook(session.ID, "", ""); err != nil {
 		model.RespondInternalError(w, err)
 		return
 	}
-
-	middleware.InvalidateUserCache(user.Token)
 
 	model.RespondOK(w, map[string]string{
 		"details": "Webhook deleted successfully",
